@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Family Chat Online</title>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<style>
+body{
+font-family: Arial;
+background:#e5ddd5;
+padding:10px;
+}
+
+#chatbox{
+height:400px;
+background:white;
+overflow:auto;
+padding:10px;
+border-radius:10px;
+}
+
+.msg{
+background:#dcf8c6;
+margin:5px;
+padding:8px;
+border-radius:8px;
+width:fit-content;
+}
+
+input{
+padding:10px;
+margin:3px;
+}
+
+button{
+padding:10px;
+background:green;
+color:white;
+border:none;
+}
+</style>
+</head>
+
+<body>
+
+<h3>Family Chat</h3>
+
+<button onclick="clearChat()">Clear Chat</button>
+
+<br><br>
+
+<input id="name" placeholder="Your Name" onblur="saveName()">
+
+<br>
+
+<div id="chatbox"></div>
+
+<br>
+
+<input id="msg" placeholder="Type message">
+<button onclick="send()">Send</button>
+
+<script>
+
+var firebaseConfig = {
+apiKey: "AIzaSyCsJcnwbvCRPYy9gSwTVxDomxf9v7sJzi4",
+authDomain: "familychat-273cb.firebaseapp.com",
+databaseURL: "https://familychat-273cb-default-rtdb.firebaseio.com",
+projectId: "familychat-273cb",
+storageBucket: "familychat-273cb.firebasestorage.app",
+messagingSenderId: "23951900805",
+appId: "1:23951900805:web:24003ee263aaa943ad29ec"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+var db = firebase.database().ref("chat");
+
+// AUTO LOAD NAME
+window.onload = function(){
+let savedName = localStorage.getItem("familyName");
+if(savedName){
+document.getElementById("name").value = savedName;
+}
+}
+
+// SAVE NAME
+function saveName(){
+let n = document.getElementById("name").value;
+localStorage.setItem("familyName", n);
+}
+
+// RECEIVE FULL CHAT
+db.on("value", function(snapshot){
+
+document.getElementById("chatbox").innerHTML="";
+
+snapshot.forEach(function(child){
+
+let m = child.val();
+
+let div = document.createElement("div");
+div.className="msg";
+div.innerHTML="<b>"+m.name+"</b><br>"+m.text;
+
+document.getElementById("chatbox").appendChild(div);
+
+});
+
+});
+
+// SEND MESSAGE
+function send(){
+
+let name=document.getElementById("name").value;
+let text=document.getElementById("msg").value;
+
+if(text=="") return;
+
+db.push({
+name:name,
+text:text
+});
+
+document.getElementById("msg").value="";
+}
+
+// CLEAR CHAT
+function clearChat(){
+
+if(confirm("Clear all messages?")){
+
+firebase.database().ref("chat").remove();
+
+document.getElementById("chatbox").innerHTML="";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
